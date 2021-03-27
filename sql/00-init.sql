@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS message (
+created TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+id VARCHAR(32) NOT NULL,
+int_id VARCHAR(16) NOT NULL,
+str VARCHAR(640) NOT NULL,
+status BOOL,
+PRIMARY KEY message_id_pk (id),
+KEY message_created_idx (created),
+KEY message_int_id_idx (int_id)
+) ENGINE MyISAM DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS log (
+created TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+int_id VARCHAR(16) NOT NULL,
+str VARCHAR(640),
+address VARCHAR(64),
+KEY log_address_idx (address)
+) ENGINE MyISAM DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;

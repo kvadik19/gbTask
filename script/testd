@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]
+then
+	echo "Start/restart Drive as daemon on defined ports. Alternate usage: `basename $0` stop";
+	cmd="";
+else
+	cmd=$1;
+fi
+
+if [ -r '/var/www/gb/script/test' ]
+then
+	if [ "$cmd" = "stop" ]
+	then 
+		hypnotoad -s /var/www/gb/script/test
+	else
+		hypnotoad /var/www/gb/script/test
+
+# Launch server in interactive mode for develope purposes
+# 		morbo -l http://127.0.0.1:9510 /var/www/gb/script/test
+	fi
+else
+	echo Server script does not exist or is not readable. Exit.; 
+	exit 1;
+fi
+
+

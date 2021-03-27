@@ -1,0 +1,51 @@
+%#	Mojolicious template 
+
+<!DOCTYPE html>
+<html lang="ru" xml:lang="ru" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; utf-8" />
+	<meta http-equiv="content-language" content="ru" />
+	<title>Test site</title>
+
+	<meta name="description" content="Test site" />
+	<meta name="robots" content="noindex,nofollow" />
+	<meta name="referrer" content="no-referrer-when-downgrade"/>
+
+	<link rel="stylesheet" type="text/css" href="/css/defines.css?<%== $stats->{'css'} %>" />
+	<link rel="stylesheet" type="text/css" href="/css/support.css?<%== $stats->{'css'} %>" />
+	<script type="text/javascript">
+		function createObj(type, descr) {
+			let inp = document.createElement(type);
+			for( prop in descr ) {
+				try { eval('inp.'+prop+'=descr[prop]') } catch(e) { inp.setAttribute(prop, descr[prop]) };
+			}
+			return inp;
+		}
+	</script>
+	<script type="text/javascript" src="/js/support.js?<%= $stats->{'js'} %>"></script>
+</head>
+<body>
+<header class="header">
+	<div class="container">
+		<div class="header_body">
+			<div class="head_part">
+			</div>
+		</div>
+	</div>
+</header>
+<div id="main">
+<%== content %>
+</div>
+<footer class="footer">
+	<div class="container">
+		<div class="footer_body">
+			<div class="foot_part">
+			</div>
+		</div>
+	</div>
+</footer>
+</body>
+</html>
+%	$self->logger->debug("<<<< Reply ".$self->stash('http_state')." => ".$self->req->headers->every_header('x-real-ip')->[0].
+%										", layout 'default', ", 2);
+
