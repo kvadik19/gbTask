@@ -49,7 +49,6 @@ var flusher = function(e) {
 	dime(0);
 }
 
-
 function flush( data, url, hook, nodime ) {		// Flushes data
 	let formData = '';
 	if ( typeof(data) === 'object' ) {
@@ -117,19 +116,6 @@ function dime ( flag, parent ) {		// Dim screen for user wait
 	return true;
 }		// Dim screen for user wait
 
-function $id(id) {
-	if ( document.getElementById(id) ) {
-		return document.getElementById(id);
-	} else if (document.forms.length > 0) {
-		for ( let nI=0; nI < document.forms.length; nI++ ) {
-			if ( document.forms[nI].elements.namedItem(id) ) {
-				return document.forms[nI].elements.namedItem(id);
-			}
-		}
-	}
-	return false
-}
-
 Array.prototype.grep = function (tester) {
 		let res = [];
 		for( let nI=0; nI < this.length; nI++ ) {
@@ -139,17 +125,6 @@ Array.prototype.grep = function (tester) {
 		}
 		return res;
 	};
-
-function findParentBy(node,code) {
-	let parent = node.parentNode;
-	try {
-		if ( code(parent) ) {
-			return parent;
-		} else {
-			return findParentBy(parent,code);
-		}
-	} catch(e) { return null }
-}
 
 function getCookie(c_name) {
 	if (document.cookie.length > 0) {
@@ -187,103 +162,6 @@ function setCookie(name, value, options) {		// https://learn.javascript.ru/cooki
 	document.cookie = updatedCookie;
 }
 
-function objectClone(obj, ignore) {
-	if ( !ignore ) ignore = [];
-	if ( !ignore.constructor.toString().match(/Array/i) ) ignore = [ignore];
-	if (typeof(obj) != "object" || obj == null ) return obj;
-	let clone = obj.constructor();
-	Object.keys(obj).forEach( function(key) {
-												if ( ignore.find( function(val) { return key == val }) ) return;
-												if (typeof(obj[key]) == "object") {
-													clone[key] = objectClone(obj[key]);
-												} else {
-													clone[key] = obj[key];
-												}
-											}
-										);
-	return clone;
-}
-
-function actionStore(node, action) {		// Stores assigned event handlers for node and its childrens (for cloneNode needs)
-	let ret = {};
-	ret[action] = node[action];
-	if (node.children.length > 0) {
-		ret.subact = [];
-		for ( let nn = 0; nn < node.children.length; nn++ ) {
-			ret.subact.push( actionStore(node.children[nn], action) )
-		}
-	}
-	return ret;
-}
-
-function actionSet(node, set) {		// ReStores event handlers for cloned node and its childrens (for cloneNode needs)
-	let action = Object.keys(set)[0];
-	node[action] = set[action];
-	if ( set.subact && node.children.length > 0 ) {
-		for ( let nn = 0; nn < set.subact.length; nn++ ) {
-			if ( node.children[nn] ) actionSet(node.children[nn], set.subact[nn]);
-		}
-	}
-	return true;
-}
-
-function getPosition ( element ) {
-	let offsetLeft = 0, offsetTop = 0;
-	do {
-		offsetLeft += element.offsetLeft;
-		offsetTop  += element.offsetTop;
-		} while ( element = element.offsetParent );
-	return [offsetLeft, offsetTop];
-}
-
-function getCoords(elem) {
-	if ( elem.getBoundingClientRect ) {
-		let box = elem.getBoundingClientRect();
-		return {
-				left: box.left + pageXOffset,
-				top: box.top + pageYOffset
-			};
-	} else {
-		let pos = getPosition(elem);
-		return {
-				left: pos[0],
-				top: pos[1]
-			};
-	}
-}
-
-function elementInViewport(el,parent) {
-	var top = el.offsetTop;
-	var left = el.offsetLeft;
-	var width = el.offsetWidth;
-	var height = el.offsetHeight;
-
-	var offY = window.pageYOffset;
-	var offX = window.pageXOffset;
-	var offH = window.innerHeight;
-	var offW = window.innerWidth;
-
-	while(el.offsetParent) {
-		el = el.offsetParent;
-		top += el.offsetTop;
-		left += el.offsetLeft;
-	}
-
-	if (parent) {
-		offY = parent.offsetTop
-		offX = parent.offsetLeft;
-		offH = parent.offsetHeight;
-		offW = parent.offsetWidth;
-	}
-	return (
-		top >= offY &&
-		left >= offX &&
-		(top + height) <= (offY + offH) &&
-		(left + width) <= (offX + offW)
-	);
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
 
 		document.querySelectorAll('.closebox').forEach( b => {
@@ -292,75 +170,8 @@ document.addEventListener('DOMContentLoaded', function() {
 						p.style.display = 'none';
 					});
 			});
-
-/* Drag element support */
-		document.querySelectorAll('.dragbar').forEach( d => {
-				let panel = findParentBy(d, function(n) { return n.className.match(/floatbar/i)} );
-				if ( !panel ) panel = d;
-				d.oncontextmenu = function(e) { e.preventDefault(); return false };
-				d.onmousedown = function(e) {
-						let pos = getCoords(panel);
-						let shiftX = e.pageX - pos.left;
-						let shiftY = e.pageY - pos.top;
-						let dragStop = function() {
-									d.onmouseup = null;
-									document.removeEventListener('mousemove', dragTo);
-									panel.className = panel.className.replace(/\s*drag/g,'');
-							};
-						let dragTo = function (e) {
-								panel.style.left = e.pageX - shiftX + 'px';
-								panel.style.top = e.pageY - shiftY + 'px';
-								if ( e.buttons === 0 ) dragStop();
-							};
-						panel.className = panel.className.replace(/\s*drag/g,'');
-						panel.className += ' drag';
-						dragTo(e);
-						document.addEventListener('mousemove', dragTo);
-						d.onmouseup = dragStop;
-					};
-				d.onselectstart = function() { return false; };
-				d.onselect = function() { return false; };
-				d.ondragstart = function() { return false };
-				panel.ondragstart = function() { return false };
-			});
-/* Drag element support END*/
 	});
 
-// Tab switching support
-function tabSwitch(tab) {		// Tab switcher 
-	if ( tab && tab.matches('.active') ) return false;
-	let switcher = document.querySelector('#Tabs');
-	if ( switcher.length == 0 ) return false;
-	let page = document.location.pathname.split('/')[2] || document.location.pathname.split('/')[1];
-
-	let cooks = getCookie('acTab');
-	let def = {};
-	if ( cooks ) def = JSON.parse(decodeURIComponent( cooks));
-
-	if ( !def[page] ) def[page] = 0;
-	let check = function(num) { return def[page] == num };
-	let doClick = true;
-	if ( tab ) {
-		check = function(num) { return switcher.children[num].isSameNode(tab) };
-		doClick = false;
-	}
-	for ( let num=0; num < switcher.children.length; num++ ) {
-		if ( check(num) ) {
-			switcher.children[num].className += ' active';
-			document.getElementById('tab_'+num).className += ' shown';
-			def[page] = num;
-		} else {
-			switcher.children[num].className = switcher.children[num].className.replace(/\s*active/ig,'');
-			document.getElementById('tab_'+num).className = document.getElementById('tab_'+num).className.replace(/\s*shown/ig,'');
-		}
-	}
-
-	if (switcher.children[def[page]].onclick && doClick ) switcher.children[def[page]].onclick();
-	setCookie('acTab', encodeURIComponent(JSON.stringify(def)), 
-						{ 'path':'/', 'domain':document.location.host,'max-age':60*60*24*365 } );
-	if ( subSwitch ) subSwitch(tab);
-	return false;
-}
 
 var uploaderObject = function(params) {
 /*

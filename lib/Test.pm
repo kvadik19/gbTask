@@ -37,8 +37,8 @@ sub startup {
 	$sys_root = "$FindBin::Bin/..";
 
 	my $r = $self->routes;
-	$r->any(['GET', 'POST'] => '/' => sub { return loader( shift ) });
-	$r->any(['GET', 'POST'] => '/*path' => sub { return loader( shift ) });
+	$r->route('/')->to( controller =>'drive', action =>'dispatch' );
+	$r->route('/*path')->to( controller =>'drive', action =>'dispatch' );
 
 	open my $fh, "< $sys_root/config/test.conf";			# Read config
 	while ( my $str = <$fh> ) {
@@ -69,6 +69,24 @@ sub startup {
 						foreach my $dir ( qw(js css) ) {			# Compose js/css version numbers to prevent browser caching
 							$self->{'stats'}->{$dir} = (stat("$sys_root/htdocs/$dir"))[9];
 						}
+
+						my $pnames = $self->req->params->names;
+						foreach my $par ( @$pnames) {
+							$self->{'param'}->{$par} = $self->param($par);
+							# Decode from IE shit
+							$self->{'param'}->{$par} = encode_json( decode_json($self->param($par))) if $self->param($par) =~ /(\\u[\da-f]{4})+/i;
+							if ( $self->{'param'}->{$par} =~ /^[\{\[].+[\]\}]$/ ) {		# Got JSON?
+								my $data = $self->{'param'}->{$par};
+								$data = url_unescape( $data );
+								eval { $data = decode_json( encode_utf8($data) ) };
+								unless ( $@ ) {
+									$self->{'param'}->{$par} = $data;
+								} else {
+									$self->logger->debug("Decode param '$par' : $@");
+								}
+							}
+						}
+
 						$self->stash(
 								http_state => 200,
 								stats => $self->{'stats'},
@@ -79,19 +97,6 @@ sub startup {
 	$logger->debug("Starting server pid $$ on defined ports.");
 }
 
-#################
-sub loader {	#	All of queries operation
-#################
-	my $self = shift;
-	my $http_state = 200;
-	my $path = [split(/\//, $self->stash('path'))];
-
-	$self->stash(
-			http_state => $http_state,
-		);
-
-	$self->render( template => 'test/loader', status => $http_state );
-}
 #################
 sub timestr {					#  Make string from serial date number
 #################
