@@ -16,7 +16,7 @@ unless ($upd_dir) {
 die "Source '$upd_dir' not found!" unless -e( $upd_dir );
 
 my $sys = {};
-open my $fh, "< $FindBin::Bin/../test.conf" || die "Can't read config!";			# Read config
+open my $fh, "< $FindBin::Bin/../config/test.conf" || die "Can't read config!";			# Read config
 while ( my $str = <$fh> ) {
 	next if $str =~ /^\s*#/;
 	my ($key, $val) = $str =~ /^\s*(.+)="(.+)"/;

@@ -40,7 +40,7 @@ sub startup {
 	$r->any(['GET', 'POST'] => '/' => sub { return loader( shift ) });
 	$r->any(['GET', 'POST'] => '/*path' => sub { return loader( shift ) });
 
-	open my $fh, "< $sys_root/test.conf";			# Read config
+	open my $fh, "< $sys_root/config/test.conf";			# Read config
 	while ( my $str = <$fh> ) {
 		next if $str =~ /^\s*#/;
 		my ($key, $val) = $str =~ /^\s*(.+)="(.+)"/;

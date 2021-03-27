@@ -13,7 +13,7 @@ unless ( $fin && -r($fin) ) {			# Check input file
 }
 
 my $sys = {};
-open my $fh, "< test.conf" || die "Can't read config!";			# Read config
+open my $fh, "< config/test.conf" || die "Can't read config!";			# Read config
 while ( my $str = <$fh> ) {
 	next if $str =~ /^\s*#/;
 	my ($key, $val) = $str =~ /^\s*(.+)="(.+)"/;
