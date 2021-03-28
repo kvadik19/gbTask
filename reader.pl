@@ -79,7 +79,7 @@ while( my $str = <$fh> ) {			# Now reading
 	my $table = 'log';
 	if ( $ins->{'flag'} eq $flag->{'from'} ) {
 		$table = 'message';
-		if ( $fields[-1] =~ /id=(.+)/ ) {
+		if ( $fields[-1] =~ /\sid=(.+)/ ) {
 			$ins->{'id'} = $1;
 			$ins->{'id'} =~ s/"*$//;
 		} else {
