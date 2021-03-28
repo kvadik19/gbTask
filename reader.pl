@@ -138,14 +138,4 @@ my ($value, $unmask) = @_;
 	}
 	return $value;
 }
-#########################
-sub find_first {				#	Find first occurience if something in array
-#########################
-my ( $array, $test, @args ) = @_;
-	my $cnt = 0;
-	foreach my $item ( @$array ) {
-		return $cnt if $test->( $item, @args );
-		$cnt++;
-	}
-	return -1;
-}
+1
