@@ -46,6 +46,6 @@
 </footer>
 </body>
 </html>
-%	$self->logger->debug("<<<< Reply ".$self->stash('http_state')." => ".$self->req->headers->every_header('x-real-ip')->[0].
-%										", layout 'default', ", 2);
+%	$self->logger->debug("<<<< Reply ".$self->stash('http_state')." => "
+%							.$self->req->headers->every_header('x-real-ip')->[0].", layout 'default'");
 

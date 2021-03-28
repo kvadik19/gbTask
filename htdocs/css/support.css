@@ -147,7 +147,8 @@ div.options {
 	border:1px solid var(--panel-back-lt);
 	display:flex;
 	flex-direction:row;
-	justify-content: space-between;
+	justify-content: space-evenly;
+	align-items:center;
 	margin:10px;
 	border:none;
 }
@@ -196,6 +197,9 @@ div.options {
 	background-color: unset !important;
 	border: none !important;
 }
+p.comment {
+	color:var(--red);
+}
 
 .closebox {
 	font-size: 22px;
@@ -213,4 +217,48 @@ div.options {
 	display:block;
 	margin:1px 2em;
 }
-
+#out {
+	font-size:10pt;
+	font-family:SansMono, monospace;
+	display:flex;
+	flex-direction:column;
+}
+.log_row {
+	display:flex;
+	padding:0.3em 0px;
+	margin:0px 0.3em;
+	cursor:default;
+}
+.log_row.rollup {
+}
+.log_str {
+	white-space:nowrap;
+	overflow:hidden;
+}
+.log_str.narrow:hover {
+	white-space:normal;
+	line-height: 1.5;
+	color: var(--body-text);
+	background-color: var(--balloon-back);
+	padding: 0.2em;
+}
+.log_row:nth-of-type(even){
+	background-color:var(--body-back-alt);
+}
+.log_row > div {
+	display:inline-block;
+	white-space:nowrap;
+}
+.log_row > div:not(:first-child) {
+	margin-left:0.5em;
+}
+.log_row > div:not(:last-child) {
+	margin-right:0.5em;
+}
+.log_num {
+	min-width:1.5em;
+}
+.log_time {
+}
+.log_str {
+}

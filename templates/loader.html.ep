@@ -1,6 +1,8 @@
 <div class="action">
 % if ( stash('html_code') ) {
-	<%== $html_code %>
+	<div class="error">
+<%== $html_code %>
+	</div>
 % } else {
 	<h4>Последний полученный лог</h4>
 	<div class="optgroup">
@@ -10,7 +12,13 @@
 				<input type="text" id="in" class="form_input" />
 			</div>
 			<div id="info" class="opt">
-				Some informative messages here
+				<p class="comment">
+					Some informative messages here
+				</p>
+				<div class="comment" style="display:none">
+					Адресат: <span id="addr"></span><br>
+					Сообщения: <span id="shown"></span> из <span id="total"></span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -20,19 +28,87 @@
 </div>
 
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-	document.getElementById('in').onblur = function(e) {
-			if ( !e.target.value.match(/\w+@\w+/) ) return false;
-			flush({'address':e.target.value},document.location.origin+'/quest', function(resp) {
+let address;
+let doQuery =  function(e) {
+			if ( e.type == 'paste') {
+				let ins = (e.clipboardData || window.clipboardData).getData('text');
+				e.target.value = ins;
+				e.preventDefault();
+			}
+			address = e.target.value.trim();
+			if ( !address.match(/\w+@\w+/) ) return false;
+			let shown = document.getElementById('shown').innerText * 1;
+			let total = document.getElementById('total').innerText * 1;
+			let addr  = document.getElementById('addr').innerText;
+			if ( address == addr && shown > 0) return false;		//  && shown >= total 
+
+			dime(1);
+			flush({'address':address},document.location.origin+'/quest', function(resp) {
+								dime(0);
 								if ( resp.match(/^[\[\{]/) ) resp = JSON.parse(resp);
-								if ( resp.code > 0 ) {
-									drawLog(resp.data);
+								if ( resp.qty > 0 ) {
+									drawLog(resp);
 								} else if ( resp.fail ) {
 									alert(resp.fail);
+								} else {
+									if ( shown === 0 ) {
+										document.querySelector('#info div.comment').style.display = 'none';
+									}
+									document.querySelector('#info p.comment').style.display = 'block';
+									document.querySelector('#info p.comment').innerText 
+												= 'Сообщения по адресату '+address+' не найдены';
 								}
 							});
 		};
-});
-function drawLog(data) {
+
+function drawLog(resp) {
+
+	let shown = document.getElementById('shown').innerText * 1;
+	if ( resp.address != document.getElementById('addr').innerText ) {
+		document.getElementById('addr').innerText = resp.address;
+		document.querySelector('#info div.comment').style.display = 'block';
+		document.querySelector('#info p.comment').style.display = 'none';
+		document.getElementById('out').innerHTML = '';
+		shown = 0;
+	}
+
+	if ( shown+resp.qty > resp.total ) {
+		document.querySelector('#info p.comment').innerText 
+				= (shown + resp.qty - res.total)+' раз не найдено прибывшее (<=) сообщение';
+		document.querySelector('#info p.comment').style.display = 'block';
+		resp.total = shown+resp.qty;
+	}
+
+	document.getElementById('shown').innerText = shown + resp.qty;
+	document.getElementById('total').innerText = resp.total;
+	let patch = '';
+	if ( screen.availWidth < 1200 ) patch = ' narrow';
+	let mkRow = function(data) {
+			let row = createObj('div', {'className':'log_row',		// 'title':data.str,
+										'innerHTML':'<div class="log_num">'+data.cnt+'</div>'} );
+			if ( data.class ) row.className += ' '+data.class;
+			Object.keys(data.dataset).forEach( k =>{ row.dataset[k] = data.dataset[k]});
+			let time = createObj('div', {'className':'log_time','innerText':data.time});
+			let str = createObj('div', {'className':'log_str'+patch,'innerText':data.str});
+			row.appendChild(time);
+			row.appendChild(str);
+			return row;
+		};
+	let cnt = 0;
+	resp.data.forEach( r =>{
+			cnt++;
+			let def = {'dataset':{'int_id':r.int_id, 'id':r.id},'cnt':shown+cnt, 'time':r.time, 'str':r.str};
+			document.getElementById('out').appendChild( mkRow(def));
+			r.log.forEach( lr =>{
+					let def = {'class':'rollup', 'dataset':{'int_id':r.int_id, 'id':r.id},'cnt':'', 
+								'time':lr.time, 'str':lr.str};
+					document.getElementById('out').appendChild( mkRow(def));
+				});
+		});
 }
+document.addEventListener('DOMContentLoaded', function() {
+	document.getElementById('in').onblur = doQuery;
+	document.getElementById('in').onpaste = doQuery;
+	document.getElementById('in').onkeypress = function(e) { if (e.key == 'Enter') e.target.blur(); };
+});
 </script>
